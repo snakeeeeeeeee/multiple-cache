@@ -1,7 +1,7 @@
 spring:
   redis:
-    port: 31001
-    host: 114.67.168.57
+    port: # redis server port
+    host: # redis server host
     lettuce:
       pool:
         max-active: 50
