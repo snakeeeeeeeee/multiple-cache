@@ -1,0 +1,46 @@
+spring:
+  redis:
+    port: 31001
+    host: 114.67.168.57
+    lettuce:
+      pool:
+        max-active: 50
+        max-wait: 2000
+        max-idle: 20
+        min-idle: 5
+  application:
+    name: aaaaaaaaaa
+
+multiple-cache:
+#  redis:
+#    - name: testName2
+#      expire: 10000
+#      strategy: DEFAULT
+#    - name: testName3
+#      expire: 10000
+#      strategy: DEFAULT
+#  caffeine:
+#    - name: testName2
+#      expireAfterAccess: 30
+#      initialCapacity: 100
+#      maximumSize: 1000
+  multiple:
+    - name: testName2
+      caffeine:
+        expireAfterAccess: 30
+        initialCapacity: 100
+        maximumSize: 1000
+      redis:
+        expire: 10000
+        strategy: DEFAULT
+
+logging:
+  level:
+    com:
+      zy:
+        github:
+          multiple:
+            cache:
+              sync: debug
+
+
