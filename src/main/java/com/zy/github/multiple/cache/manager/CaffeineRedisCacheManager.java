@@ -32,7 +32,7 @@ public class CaffeineRedisCacheManager extends AbstractCacheManager {
     protected Collection<? extends Cache> loadCaches() {
         Set<Cache> caches = new LinkedHashSet<>();
         Collection<String> redisCaches = redisCacheManager.getCacheNames();
-        redisCaches.stream().forEach((item) -> {
+        redisCaches.forEach(item -> {
             Cache multipleCache = MultipleCache.builder()
                     .nextNode(caffeineCacheManager.getCache(item))
                     .nextNode(redisCacheManager.getCache(item))
