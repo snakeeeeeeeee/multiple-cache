@@ -43,7 +43,7 @@ public class CacheConfigProperties extends CacheConstants {
         /**
          * 缓存访问后多久过期
          */
-        protected long expireAfterAccess;
+        protected long expireAfterAccess = 3600;
 
         /**
          * 缓存写入后多久过期
@@ -51,14 +51,14 @@ public class CacheConfigProperties extends CacheConstants {
         protected long expireAfterWrite;
 
         /**
-         * 初始缓存容量最大值
+         * 缓存容量最大值
          */
         protected int maximumSize = 200;
 
         /**
          * 初始缓存容量大小
          */
-        protected int initialCapacity = 100;
+        protected int initialCapacity = 10;
 
         /**
          * 缓存加载器
