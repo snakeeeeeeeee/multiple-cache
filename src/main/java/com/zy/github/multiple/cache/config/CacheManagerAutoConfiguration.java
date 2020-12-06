@@ -67,9 +67,6 @@ public class CacheManagerAutoConfiguration {
         this.strategyMap = strategyMap;
         this.cacheLoaderMap = cacheLoaderMap;
         this.decorationHandlerMap = decorationHandlerMap;
-        //cacheProperties.getRedis().add(CacheStrategyHelper.DEFAULT_REDIS_CONFIG);
-        //cacheProperties.getCaffeine().add(CacheStrategyHelper.DEFAULT_CAFFEINE_CONFIG);
-        //cacheProperties.getMultiple().add(CacheStrategyHelper.DEFAULT_MULTIPLE_CONFIG);
     }
 
     @Bean

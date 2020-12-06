@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.zy</groupId>
     <artifactId>multiple-cache</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <name>multiple-cache</name>
     <description>多级缓存</description>
 

@@ -34,8 +34,6 @@ multiple-cache:
         maximumSize: 1000
       redis:
         expire: 10000
-        strategy: defaultRedisCacheStrategy
-      #decorators: demoCachedValueRebuilder
 
 logging:
   level:
