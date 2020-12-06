@@ -42,6 +42,7 @@ public class CaffeineRedisCacheManager extends AbstractCacheManager {
             if (handlers != null) {
                 multipleCache = CacheDecorationBuilder
                         .newBuilder(multipleCache, handlers)
+                        .valueRebuild()
                         .build();
             }
             caches.add(multipleCache);

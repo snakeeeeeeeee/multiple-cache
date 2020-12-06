@@ -9,11 +9,11 @@ import java.util.concurrent.Callable;
  * @author z
  * @date 2020/11/27 15:58
  */
-public abstract class BaseCacheDecorator<C extends Cache> implements Cache {
+public abstract class AbstractCacheDecorator<C extends Cache> implements Cache {
 
     protected C target;
 
-    public BaseCacheDecorator(C target) {
+    public AbstractCacheDecorator(C target) {
         this.target = target;
     }
 

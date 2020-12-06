@@ -1,5 +1,6 @@
 package com.zy.github.multiple.cache.manager;
 
+import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.zy.github.multiple.cache.decorators.CacheDecorationBuilder;
 import com.zy.github.multiple.cache.strategys.CacheStrategy;
@@ -34,12 +35,12 @@ public class CaffeineCacheManagerAdapter extends CaffeineCacheManager {
         private String name;
 
         /**
-         * 缓存过期时间
+         * 缓存过期时间(最后一次访问时间后)
          */
         private long expireAfterAccess;
 
         /**
-         * 未写入缓存过期时间
+         * 缓存过期时间(无论是否访问)
          */
         private long expireAfterWrite;
 
@@ -62,13 +63,18 @@ public class CaffeineCacheManagerAdapter extends CaffeineCacheManager {
          * 是否开启缓存同步策略
          */
         private boolean disableSync = true;
+
+        /**
+         * 缓存加载器
+         */
+        private CacheLoader cacheLoader;
     }
 
 
     public CaffeineCacheManagerAdapter(Collection<String> cacheNames, Collection<CacheConfig> cacheConfigs,
-                                Map<String, AbstractCaffeineCacheStrategy> cacheStrategyMap,
-                                Map<String, Set<CacheDecorationHandler>> decorationHandlers,
-                                CacheSyncManager cacheSyncManager) {
+                                       Map<String, AbstractCaffeineCacheStrategy> cacheStrategyMap,
+                                       Map<String, Set<CacheDecorationHandler>> decorationHandlers,
+                                       CacheSyncManager cacheSyncManager) {
         super();
         this.cacheStrategyMap = cacheStrategyMap;
         this.decorationHandlers = decorationHandlers;
@@ -99,8 +105,11 @@ public class CaffeineCacheManagerAdapter extends CaffeineCacheManager {
             }
 
             caffeine.recordStats();
-
-            return caffeine.build();
+            if (cacheConfig.getCacheLoader() == null) {
+                return caffeine.build();
+            } else {
+                return caffeine.build(cacheConfig.getCacheLoader());
+            }
         }
         return Caffeine.newBuilder().build();
     }
@@ -117,6 +126,7 @@ public class CaffeineCacheManagerAdapter extends CaffeineCacheManager {
                         cacheConfig.getExpireAfterAccess() > 0 ? cacheConfig.getExpireAfterAccess() : cacheConfig.getExpireAfterWrite())
                 //本地缓存同步
                 .localCacheSync(cacheConfig.disableSync, cacheSyncManager)
+                .valueRebuild()
                 .build();
     }
 }

@@ -3,19 +3,19 @@ package com.zy.github.multiple.cache.config;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zy.github.multiple.cache.constans.CacheStrategyType;
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.zy.github.multiple.cache.manager.CaffeineCacheManagerAdapter;
 import com.zy.github.multiple.cache.manager.CaffeineRedisCacheManager;
 import com.zy.github.multiple.cache.manager.RedisCacheManagerAdapter;
 import com.zy.github.multiple.cache.strategys.AbstractCaffeineCacheStrategy;
-import com.zy.github.multiple.cache.strategys.impl.DefaultAbstractRedisCacheStrategy;
+import com.zy.github.multiple.cache.strategys.impl.DefaultRedisCacheStrategy;
 import com.zy.github.multiple.cache.strategys.AbstractRedisCacheStrategy;
 import com.zy.github.multiple.cache.strategys.CacheStrategy;
 import com.zy.github.multiple.cache.sync.CacheSyncManager;
 import com.zy.github.multiple.cache.sync.CacheSyncMessageListener;
 import com.zy.github.multiple.cache.sync.RedisCacheSyncManager;
 import com.zy.github.multiple.cache.CacheDecorationHandler;
-import com.zy.github.multiple.cache.util.CacheStrategyHelper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -53,14 +53,20 @@ public class CacheManagerAutoConfiguration {
 
 
     private Map<String, CacheStrategy> strategyMap;
+    private Map<String, CacheLoader> cacheLoaderMap;
     private Map<String, CacheDecorationHandler> decorationHandlerMap;
     private CacheConfigProperties cacheProperties;
     private String applicationName;
 
-    public CacheManagerAutoConfiguration(CacheConfigProperties cacheConfigProperties, ApplicationContext applicationContext) {
-        String applicationName = applicationContext.getEnvironment().getProperty("spring.application.name");
+    public CacheManagerAutoConfiguration(CacheConfigProperties cacheConfigProperties, ApplicationContext applicationContext,
+                                         Map<String, CacheStrategy> strategyMap, Map<String, CacheLoader> cacheLoaderMap,
+                                         Map<String, CacheDecorationHandler> decorationHandlerMap) {
+        applicationName = applicationContext.getEnvironment().getProperty("spring.application.name");
         this.applicationName = ObjectUtils.isEmpty(applicationName) ? "DEFAULT" : applicationName;
         this.cacheProperties = cacheConfigProperties;
+        this.strategyMap = strategyMap;
+        this.cacheLoaderMap = cacheLoaderMap;
+        this.decorationHandlerMap = decorationHandlerMap;
         //cacheProperties.getRedis().add(CacheStrategyHelper.DEFAULT_REDIS_CONFIG);
         //cacheProperties.getCaffeine().add(CacheStrategyHelper.DEFAULT_CAFFEINE_CONFIG);
         //cacheProperties.getMultiple().add(CacheStrategyHelper.DEFAULT_MULTIPLE_CONFIG);
@@ -135,13 +141,6 @@ public class CacheManagerAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(RedisSerializer.class)
-    public RedisSerializer redisSerializer() {
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = getJsonSerializer();
-        return jackson2JsonRedisSerializer;
-    }
-
-    @Bean
     @ConditionalOnMissingBean(RedisCacheWriter.class)
     public RedisCacheWriter redisCacheWriter(LettuceConnectionFactory lettuceConnectionFactory) {
         return RedisCacheWriter.nonLockingRedisCacheWriter(lettuceConnectionFactory);
@@ -149,52 +148,22 @@ public class CacheManagerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(CacheManager.class)
-    public CompositeCacheManager cacheManager(CacheSyncManager cacheSyncManager, RedisCacheWriter redisCacheWriter, RedisSerializer redisSerializer) {
+    public CompositeCacheManager cacheManager(CacheSyncManager cacheSyncManager, RedisCacheWriter redisCacheWriter) {
         List<CacheManager> cacheManagerList = new LinkedList<>();
 
-        //caffeine缓存器
+        //caffeine
         if (!CollectionUtils.isEmpty(cacheProperties.getCaffeine())) {
             cacheManagerList.add(buildCaffeineCacheManager(cacheProperties.getCaffeine(), cacheSyncManager));
         }
 
-        //redis缓存器
+        //redis
         if (!CollectionUtils.isEmpty(cacheProperties.getRedis())) {
-            cacheManagerList.add(buildRedisCacheManager(redisCacheWriter, cacheSyncManager, redisSerializer, cacheProperties.getRedis()));
+            cacheManagerList.add(buildRedisCacheManager(redisCacheWriter, cacheSyncManager, cacheProperties.getRedis()));
         }
 
-
-        //两级缓存
+        //caffeine + redis
         if (!CollectionUtils.isEmpty(cacheProperties.getMultiple())) {
-            Set<CacheConfigProperties.CaffeineCacheConfig> caffeineCacheConfigs = new LinkedHashSet<>();
-            Set<CacheConfigProperties.RedisCacheConfig> redisCacheConfigs = new LinkedHashSet<>();
-            Map<String, Set<CacheDecorationHandler>> decorationHandlers = new HashMap<>(8);
-            cacheProperties.getMultiple().forEach(item -> {
-                CacheConfigProperties.CaffeineCacheConfig caffeineCacheConfig = item.getCaffeine();
-                caffeineCacheConfig.setName(item.getName());
-                CacheConfigProperties.RedisCacheConfig redisCacheConfig = item.getRedis();
-                redisCacheConfig.setName(item.getName());
-                caffeineCacheConfigs.add(caffeineCacheConfig);
-                redisCacheConfigs.add(redisCacheConfig);
-
-                /*if (StringUtils.isNoneBlank(item.getDecorators())) {
-                    List<String> decoratorList = Arrays.asList(item.getDecorators().split(","));
-                    Set<CacheDecorationHandler> collect = decoratorList.stream()
-                            .map(decorator -> decorationHandlerMap.get(decorator)).collect(Collectors.toSet());
-                    collect.add(cacheSyncManager);
-                    decorationHandlers.put(item.getName(), collect);
-                }*/
-
-                if (redisCacheConfig.getStrategy() != null) {
-
-                }
-            });
-
-            CaffeineRedisCacheManager multipleCacheManager
-                    = new CaffeineRedisCacheManager(
-                    buildCaffeineCacheManager(caffeineCacheConfigs, cacheSyncManager),
-                    buildRedisCacheManager(redisCacheWriter, cacheSyncManager, redisSerializer, redisCacheConfigs), decorationHandlers);
-            multipleCacheManager.initializeCaches();
-            cacheManagerList.add(multipleCacheManager);
+            cacheManagerList.add(buildCaffeineRedis(cacheSyncManager, redisCacheWriter));
         }
 
         CompositeCacheManager cacheManager = new CompositeCacheManager();
@@ -205,7 +174,6 @@ public class CacheManagerAutoConfiguration {
 
     private RedisCacheManagerAdapter buildRedisCacheManager(RedisCacheWriter cacheWriter,
                                                             CacheSyncManager cacheSyncManager,
-                                                            RedisSerializer redisSerializer,
                                                             Collection<CacheConfigProperties.RedisCacheConfig> configs) {
         Set<String> redisCacheNames = new LinkedHashSet<>();
         Map<String, RedisCacheConfiguration> redisCacheConfigurationMap = new HashMap<>();
@@ -215,21 +183,20 @@ public class CacheManagerAutoConfiguration {
             redisCacheNames.add(item.getName());
             redisCacheConfigurationMap.put(item.getName(), redisCacheConfiguration(item));
 
-            Map<String, Class<? extends CacheStrategy>> strategy_map = CacheStrategyHelper.getSTRATEGY_MAP();
-            String redisKeyPrefix = CacheStrategyType.REDIS_.name();
-            if (item.getStrategy() != null && strategy_map.containsKey(redisKeyPrefix + item.getStrategy().name())) {
-                Class strategyClass = strategy_map.get(redisKeyPrefix + item.getStrategy().name());
-                if (strategyClass == null || strategyClass.isAssignableFrom(DefaultAbstractRedisCacheStrategy.class)) {
-                    DefaultAbstractRedisCacheStrategy cacheStrategy = new DefaultAbstractRedisCacheStrategy(redisSerializer, item.getName());
-                    cacheStrategyMap.put(item.getName(), cacheStrategy);
+            if (item.getStrategy() != null && strategyMap.containsKey(item.getStrategy())) {
+                CacheStrategy strategy = strategyMap.get(item.getStrategy());
+                if (strategy instanceof AbstractRedisCacheStrategy) {
+                    cacheStrategyMap.put(item.getName(), (AbstractRedisCacheStrategy) strategy);
                 }
+            } else {
+                DefaultRedisCacheStrategy cacheStrategy = new DefaultRedisCacheStrategy(item.getName());
+                cacheStrategyMap.put(item.getName(), cacheStrategy);
             }
 
             if (!ObjectUtils.isEmpty(item.getDecorators())) {
                 List<String> decoratorList = Arrays.asList(item.getDecorators().split(","));
                 Set<CacheDecorationHandler> collect = decoratorList.stream()
                         .map(decorator -> decorationHandlerMap.get(decorator)).collect(Collectors.toSet());
-                collect.add(cacheSyncManager);
                 decorationHandlers.put(item.getName(), collect);
             }
         });
@@ -249,19 +216,20 @@ public class CacheManagerAutoConfiguration {
             caffeineCacheNames.add(item.getName());
             CaffeineCacheManagerAdapter.CacheConfig cacheConfig = new CaffeineCacheManagerAdapter.CacheConfig();
             cacheConfig.setExpireAfterAccess(item.getExpireAfterAccess());
+            cacheConfig.setExpireAfterWrite(item.getExpireAfterWrite());
             cacheConfig.setInitialCapacity(item.getInitialCapacity());
             cacheConfig.setMaximumSize(item.getMaximumSize());
             cacheConfig.setName(item.getName());
             cacheConfig.setDisableSync(item.isDisableSync());
             cacheConfig.setEnableSoftRef(item.isEnableSoftRef());
 
-            /*if (StringUtils.isNoneBlank(item.getCacheLoader())
-                    && caffeineCacheLoaderMap.containsKey(item.getCacheLoader())){
-                cacheConfig.setCacheLoader(caffeineCacheLoaderMap.get(item.getCacheLoader()));
-            }*/
+            if (!ObjectUtils.isEmpty(item.getCacheLoader())
+                    && cacheLoaderMap.containsKey(item.getCacheLoader())) {
+                cacheConfig.setCacheLoader(cacheLoaderMap.get(item.getCacheLoader()));
+            }
 
             caffeineCacheConfigs.add(cacheConfig);
-            if (null != item.getStrategy() && strategyMap.containsKey(item.getStrategy())) {
+            if (!ObjectUtils.isEmpty(item.getStrategy()) && strategyMap.containsKey(item.getStrategy())) {
                 CacheStrategy strategy = strategyMap.get(item.getStrategy());
                 if (strategy instanceof AbstractCaffeineCacheStrategy) {
                     cacheStrategyMap.put(item.getName(), (AbstractCaffeineCacheStrategy) strategy);
@@ -272,7 +240,6 @@ public class CacheManagerAutoConfiguration {
                 List<String> decoratorList = Arrays.asList(item.getDecorators().split(","));
                 Set<CacheDecorationHandler> collect = decoratorList.stream()
                         .map(decorator -> decorationHandlerMap.get(decorator)).collect(Collectors.toSet());
-                collect.add(cacheSyncManager);
                 decorationHandlers.put(item.getName(), collect);
             }
         });
@@ -283,7 +250,7 @@ public class CacheManagerAutoConfiguration {
 
     private RedisCacheConfiguration redisCacheConfiguration(CacheConfigProperties.RedisCacheConfig redisCacheConfig) {
         RedisSerializationContext.SerializationPair pair = RedisSerializationContext.SerializationPair
-                .fromSerializer(redisSerializer());
+                .fromSerializer(getJsonSerializer());
         return RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofSeconds(redisCacheConfig.getExpire()))
                 .serializeValuesWith(pair);
@@ -292,17 +259,42 @@ public class CacheManagerAutoConfiguration {
 
     private Jackson2JsonRedisSerializer<Object> getJsonSerializer() {
         // 设置序列化
-        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<Object>(
-                Object.class);
+        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
         ObjectMapper om = new ObjectMapper();
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        om.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
         jackson2JsonRedisSerializer.setObjectMapper(om);
         return jackson2JsonRedisSerializer;
     }
 
-    private CaffeineRedisCacheManager buildCaffeineRedis() {
-        return null;
+
+    private CaffeineRedisCacheManager buildCaffeineRedis(CacheSyncManager cacheSyncManager, RedisCacheWriter redisCacheWriter) {
+        Set<CacheConfigProperties.CaffeineCacheConfig> caffeineCacheConfigs = new LinkedHashSet<>();
+        Set<CacheConfigProperties.RedisCacheConfig> redisCacheConfigs = new LinkedHashSet<>();
+        Map<String, Set<CacheDecorationHandler>> decorationHandlers = new HashMap<>(8);
+        cacheProperties.getMultiple().forEach(item -> {
+            CacheConfigProperties.CaffeineCacheConfig caffeineCacheConfig = item.getCaffeine();
+            caffeineCacheConfig.setName(item.getName());
+            CacheConfigProperties.RedisCacheConfig redisCacheConfig = item.getRedis();
+            redisCacheConfig.setName(item.getName());
+            caffeineCacheConfigs.add(caffeineCacheConfig);
+            redisCacheConfigs.add(redisCacheConfig);
+
+            if (!ObjectUtils.isEmpty(item.getDecorators())) {
+                List<String> decoratorList = Arrays.asList(item.getDecorators().split(","));
+                Set<CacheDecorationHandler> collect = decoratorList.stream()
+                        .map(decorator -> decorationHandlerMap.get(decorator)).collect(Collectors.toSet());
+                decorationHandlers.put(item.getName(), collect);
+            }
+
+        });
+
+        CaffeineRedisCacheManager multipleCacheManager
+                = new CaffeineRedisCacheManager(
+                buildCaffeineCacheManager(caffeineCacheConfigs, cacheSyncManager),
+                buildRedisCacheManager(redisCacheWriter, cacheSyncManager, redisCacheConfigs), decorationHandlers);
+        multipleCacheManager.initializeCaches();
+        return multipleCacheManager;
     }
 
 }

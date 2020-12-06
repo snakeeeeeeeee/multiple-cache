@@ -1,5 +1,6 @@
 package com.zy.github.multiple.cache.decorators;
 
+import com.zy.github.multiple.cache.CachedValueRebuilder;
 import com.zy.github.multiple.cache.strategys.CacheStrategy;
 import com.zy.github.multiple.cache.sync.CacheSyncManager;
 import com.zy.github.multiple.cache.CacheDecorationHandler;
@@ -31,6 +32,8 @@ public class CacheDecorationBuilder {
         handlers.forEach(item -> {
             if (item instanceof CacheSyncManager) {
                 handlerMap.put(CacheSyncManager.class, item);
+            }else if (item instanceof CachedValueRebuilder){
+                handlerMap.put(CachedValueRebuilder.class, item);
             }
         });
 
@@ -38,19 +41,18 @@ public class CacheDecorationBuilder {
     }
 
 
-    public CacheDecorationBuilder localCacheSync(boolean disableSync) {
-        if ((base instanceof CaffeineCache) && !disableSync) {
-            CacheSyncManager cacheSyncManager = getHandler(CacheSyncManager.class);
-            if (cacheSyncManager != null) {
-                result = new CacheSyncDecorator(result, cacheSyncManager);
-            }
-        }
-        return this;
-    }
 
     public CacheDecorationBuilder localCacheSync(boolean disableSync, CacheSyncManager cacheSyncManager) {
         if ((base instanceof CaffeineCache) && disableSync) {
             result = new CacheSyncDecorator(result, cacheSyncManager);
+        }
+        return this;
+    }
+
+    public CacheDecorationBuilder valueRebuild(){
+        CachedValueRebuilder rebuilder = getHandler(CachedValueRebuilder.class);
+        if (null != rebuilder) {
+            result = new CachedValueRebuildDecorator(result, rebuilder);
         }
         return this;
     }

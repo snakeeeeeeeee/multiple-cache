@@ -10,10 +10,10 @@ import org.springframework.cache.Cache;
 import org.springframework.util.ObjectUtils;
 
 /**
- * 缓存同步装饰处理
+ * 缓存同步处理
  * @param <C>
  */
-public class CacheSyncDecorator<C extends Cache> extends BaseCacheDecorator<C> implements CacheSyncEventHandler {
+public class CacheSyncDecorator<C extends Cache> extends AbstractCacheDecorator<C> implements CacheSyncEventHandler {
 
     protected CacheSyncManager cacheSyncManager;
 

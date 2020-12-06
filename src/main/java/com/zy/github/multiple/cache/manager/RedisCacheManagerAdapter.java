@@ -42,6 +42,7 @@ public class RedisCacheManagerAdapter implements CacheManager {
         cacheManagerProxy.loadCaches().forEach(item -> {
             Cache storeCache = CacheDecorationBuilder.newBuilder(item, decorationHandlers.get(item.getName()))
                     .customCacheStrategy(cacheStrategyMap.get(item.getName()), expireMap.get(item.getName()).getTtl().getSeconds())
+                    .valueRebuild()
                     .build();
             this.cacheMap.put(item.getName(), storeCache);
         });

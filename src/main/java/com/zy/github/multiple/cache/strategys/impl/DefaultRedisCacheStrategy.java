@@ -12,11 +12,11 @@ import java.util.concurrent.Callable;
  * @author zy 2020/11/29
  */
 
-public class DefaultAbstractRedisCacheStrategy<K, V> extends AbstractRedisCacheStrategy<K, V> {
+public class DefaultRedisCacheStrategy<K, V> extends AbstractRedisCacheStrategy<K, V> {
 
 
-    public DefaultAbstractRedisCacheStrategy(RedisSerializer redisSerializer, String cacheName) {
-        super(redisSerializer, cacheName);
+    public DefaultRedisCacheStrategy(String cacheName) {
+        super(cacheName);
     }
 
     @Override
@@ -60,4 +60,5 @@ public class DefaultAbstractRedisCacheStrategy<K, V> extends AbstractRedisCacheS
     public <T> T doGet(RedisCacheWriter nativeCache, K key, Callable<T> valueLoader) {
         return (T) this.doGet(nativeCache, key);
     }
+
 }

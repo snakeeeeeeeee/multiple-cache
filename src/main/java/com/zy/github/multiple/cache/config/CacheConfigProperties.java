@@ -38,12 +38,17 @@ public class CacheConfigProperties extends CacheConstants {
         /**
          * 缓存策略
          */
-        protected Caffeine strategy;
+        protected String strategy;
 
         /**
-         * 缓存过期时间
+         * 缓存访问后多久过期
          */
         protected long expireAfterAccess;
+
+        /**
+         * 缓存写入后多久过期
+         */
+        protected long expireAfterWrite;
 
         /**
          * 初始缓存容量最大值
@@ -83,7 +88,7 @@ public class CacheConfigProperties extends CacheConstants {
     public static class RedisCacheConfig {
         protected String name;
         protected long expire;
-        protected Redis strategy;
+        protected String strategy;
         protected String decorators;
     }
 

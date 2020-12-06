@@ -7,6 +7,8 @@ import org.springframework.cache.CacheManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * @author zy 2020/12/3
  */
@@ -18,13 +20,13 @@ public class DemoController {
     private CacheManager cacheManager;
 
     @RequestMapping("cache-test")
-    public User demo(){
-        User test = demoService.test("1111");
-        /*User test3 = demoService.test3("2222");
-        User test4 = demoService.test4("4444");
+    public void demo(){
+        //User test = demoService.test("1111");
+        List<User> test3 = demoService.test3("2222");
+        System.out.println(test3);
+        /*User test4 = demoService.test4("4444");
         System.out.println(test);
         System.out.println(test3);
         System.out.println(test4);*/
-        return test;
     }
 }
