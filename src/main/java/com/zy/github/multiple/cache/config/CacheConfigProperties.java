@@ -1,7 +1,6 @@
 package com.zy.github.multiple.cache.config;
 
 import com.zy.github.multiple.cache.constans.CacheConstants;
-import com.zy.github.multiple.cache.constans.CacheStrategyType.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
