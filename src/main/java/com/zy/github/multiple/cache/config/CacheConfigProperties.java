@@ -1,6 +1,5 @@
 package com.zy.github.multiple.cache.config;
 
-import com.zy.github.multiple.cache.constans.CacheConstants;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +15,7 @@ import java.util.List;
  */
 @Data
 @ConfigurationProperties(prefix = "multiple-cache", ignoreInvalidFields = true)
-public class CacheConfigProperties extends CacheConstants {
+public class CacheConfigProperties {
 
     private List<CaffeineCacheConfig> caffeine = new LinkedList<>();
     private List<RedisCacheConfig> redis = new LinkedList<>();
@@ -24,7 +23,6 @@ public class CacheConfigProperties extends CacheConstants {
 
 
     @Data
-    @Builder
     @AllArgsConstructor
     @NoArgsConstructor
     public static class CaffeineCacheConfig {
@@ -81,7 +79,6 @@ public class CacheConfigProperties extends CacheConstants {
     }
 
     @Data
-    @Builder
     @AllArgsConstructor
     @NoArgsConstructor
     public static class RedisCacheConfig {

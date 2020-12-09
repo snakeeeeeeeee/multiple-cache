@@ -17,7 +17,6 @@ import com.zy.github.multiple.cache.sync.CacheSyncMessageListener;
 import com.zy.github.multiple.cache.sync.RedisCacheSyncManager;
 import com.zy.github.multiple.cache.CacheDecorationHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
@@ -52,10 +51,10 @@ import java.util.stream.Collectors;
 public class CacheManagerAutoConfiguration {
 
 
-    private Map<String, CacheStrategy> strategyMap;
-    private Map<String, CacheLoader> cacheLoaderMap;
-    private Map<String, CacheDecorationHandler> decorationHandlerMap;
-    private CacheConfigProperties cacheProperties;
+    private final Map<String, CacheStrategy> strategyMap;
+    private final Map<String, CacheLoader> cacheLoaderMap;
+    private final Map<String, CacheDecorationHandler> decorationHandlerMap;
+    private final CacheConfigProperties cacheProperties;
     private String applicationName;
 
     public CacheManagerAutoConfiguration(CacheConfigProperties cacheConfigProperties, ApplicationContext applicationContext,
@@ -102,21 +101,21 @@ public class CacheManagerAutoConfiguration {
         return redisTemplate;
     }
 
-    @Bean(name = "syncTaskExecutor")
-    @ConditionalOnMissingBean(name = "syncTaskExecutor")
+    @Bean(name = "syncCacheTaskExecutor")
+    @ConditionalOnMissingBean(name = "syncCacheTaskExecutor")
     public TaskExecutor syncTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(5);
+        executor.setMaxPoolSize(4);
         executor.setKeepAliveSeconds(60);
         executor.setThreadNamePrefix("cache-sync-");
         return executor;
     }
 
-    @Bean
-    //@ConditionalOnBean(CacheSyncMessageListener.class)
+    @Bean(name = "redisCacheMessageSyncListenerContainer")
+    @ConditionalOnMissingBean(name = "redisCacheMessageSyncListenerContainer")
     public RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory, CacheSyncMessageListener receiver,
-                                                   @Qualifier("syncTaskExecutor") TaskExecutor executor) {
+                                                   @Qualifier("syncCacheTaskExecutor") TaskExecutor executor) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         container.setTaskExecutor(executor);
@@ -131,7 +130,6 @@ public class CacheManagerAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnBean(CacheSyncManager.class)
     @ConditionalOnMissingBean(CacheSyncMessageListener.class)
     public CacheSyncMessageListener cacheSyncMessageListener(CacheSyncManager cacheSyncManager, RedisTemplate<String, Object> redisTemplate) {
         return new CacheSyncMessageListener(redisTemplate, cacheSyncManager);

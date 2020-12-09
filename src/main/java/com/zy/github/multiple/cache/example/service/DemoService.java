@@ -13,17 +13,8 @@ import java.util.List;
 @Service
 public class DemoService {
 
-    @Cacheable(cacheNames = "testName2", key = "#id")
-    public User test(String id){
-        System.out.println("1111");
-        User user = new User();
-        user.setAge(11);
-        user.setName("zzz");
-        return user;
-    }
-
-    @Cacheable(cacheNames = "testName2", key = "#id")
-    public List<User> test3(String id){
+    @Cacheable(cacheNames = "testCache", key = "#id")
+    public List<User> cacheTest(String id){
         System.out.println("333");
         User user = new User();
         user.setAge(22);
@@ -34,12 +25,4 @@ public class DemoService {
         return users;
     }
 
-    @Cacheable(cacheNames = "testName3", key = "#id")
-    public User test4(String id){
-        System.out.println("444");
-        User user = new User();
-        user.setAge(44);
-        user.setName("ccc");
-        return user;
-    }
 }
