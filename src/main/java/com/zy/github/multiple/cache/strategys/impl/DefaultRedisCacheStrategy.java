@@ -24,7 +24,7 @@ public class DefaultRedisCacheStrategy<K, V> extends AbstractRedisCacheStrategy<
 
         byte[] value = nativeCache.get(cacheName, rawKey(key));
         if (value != null && value.length > 0) {
-            return (V) redisSerializer.deserialize(value);
+            return (V) jacksonSerializer.deserialize(value);
         }
         return null;
     }
@@ -39,7 +39,7 @@ public class DefaultRedisCacheStrategy<K, V> extends AbstractRedisCacheStrategy<
     public V doPutIfAbsent(RedisCacheWriter nativeCache, K key, V value) {
         byte[] v = nativeCache.putIfAbsent(cacheName, rawKey(key), rawValue(value), Duration.ofSeconds(defaultExpire));
         if (value != null && v.length > 0) {
-            return (V) redisSerializer.deserialize(v);
+            return (V) jacksonSerializer.deserialize(v);
         }
         return null;
     }

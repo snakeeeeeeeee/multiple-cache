@@ -8,6 +8,7 @@ import com.zy.github.multiple.cache.constans.CacheConstants;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -21,8 +22,9 @@ public abstract class AbstractRedisCacheStrategy<K, V> implements CacheStrategy<
 
 
     protected long defaultExpire = 0;
-    protected RedisSerializer redisSerializer;
+    protected RedisSerializer jacksonSerializer;
     protected String cacheName;
+    protected RedisSerializer stringSerializer = new StringRedisSerializer();
 
     public AbstractRedisCacheStrategy() {
         init();
@@ -37,9 +39,9 @@ public abstract class AbstractRedisCacheStrategy<K, V> implements CacheStrategy<
     }
 
     public void init() {
-        if (ObjectUtils.isEmpty(redisSerializer)) {
+        if (ObjectUtils.isEmpty(jacksonSerializer)) {
             synchronized (AbstractRedisCacheStrategy.class) {
-                redisSerializer = jackson2JsonRedisSerializer();
+                jacksonSerializer = jackson2JsonRedisSerializer();
             }
         }
 
@@ -52,25 +54,28 @@ public abstract class AbstractRedisCacheStrategy<K, V> implements CacheStrategy<
 
     public void init(String cacheName) {
         this.cacheName = cacheName;
-        if (redisSerializer == null) {
+        if (jacksonSerializer == null) {
             synchronized (AbstractRedisCacheStrategy.class) {
-                redisSerializer = jackson2JsonRedisSerializer();
+                jacksonSerializer = jackson2JsonRedisSerializer();
             }
         }
     }
 
     public void init(RedisSerializer redisSerializer, String cacheName) {
         this.cacheName = cacheName;
-        this.redisSerializer = redisSerializer;
+        this.jacksonSerializer = redisSerializer;
     }
 
     protected byte[] rawKey(Object key) {
         Assert.notNull(key, "non null key required");
-        return redisSerializer.serialize(key);
+        if(key instanceof String){
+            return stringSerializer.serialize(key);
+        }
+        return jacksonSerializer.serialize(key);
     }
 
     protected byte[] rawValue(Object value) {
-        return redisSerializer.serialize(value);
+        return jacksonSerializer.serialize(value);
     }
 
 

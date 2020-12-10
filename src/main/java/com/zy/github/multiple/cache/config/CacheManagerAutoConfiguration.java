@@ -76,7 +76,7 @@ public class CacheManagerAutoConfiguration {
         // 配置redisTemplate
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(lettuceConnectionFactory);
-        RedisSerializer<String> stringSerializer = new StringRedisSerializer();
+        RedisSerializer<String> stringSerializer = RedisSerializer.string();
         redisTemplate.setKeySerializer(stringSerializer);
         redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
         redisTemplate.setHashKeySerializer(stringSerializer);
@@ -92,7 +92,7 @@ public class CacheManagerAutoConfiguration {
 
         StringRedisTemplate redisTemplate = new StringRedisTemplate();
         redisTemplate.setConnectionFactory(lettuceConnectionFactory);
-        RedisSerializer<String> stringSerializer = new StringRedisSerializer();
+        RedisSerializer<String> stringSerializer = RedisSerializer.string();
         redisTemplate.setKeySerializer(stringSerializer);
         redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
         redisTemplate.setHashKeySerializer(stringSerializer);
@@ -131,7 +131,7 @@ public class CacheManagerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(CacheSyncMessageListener.class)
-    public CacheSyncMessageListener cacheSyncMessageListener(CacheSyncManager cacheSyncManager, RedisTemplate<String, Object> redisTemplate) {
+    public CacheSyncMessageListener cacheSyncMessageListener(CacheSyncManager cacheSyncManager, RedisTemplate redisTemplate) {
         return new CacheSyncMessageListener(redisTemplate, cacheSyncManager);
     }
 

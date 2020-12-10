@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zy 2020/12/3
@@ -18,6 +19,28 @@ public class DemoService {
         User user = new User();
         user.setAge(22);
         user.setName("xxx");
+
+        List<User> users = new ArrayList<>();
+        users.add(user);
+        return users;
+    }
+
+    @Cacheable(cacheNames = "testCache", key = "#id")
+    public List<User> cacheTest2(Integer id){
+        User user = new User();
+        user.setAge(33);
+        user.setName("zzz");
+
+        List<User> users = new ArrayList<>();
+        users.add(user);
+        return users;
+    }
+
+    @Cacheable(cacheNames = "testCache", key = "#map")
+    public List<User> cacheTest3(Map map){
+        User user = new User();
+        user.setAge(44);
+        user.setName("ccc");
 
         List<User> users = new ArrayList<>();
         users.add(user);
