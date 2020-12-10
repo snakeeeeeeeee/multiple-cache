@@ -10,9 +10,6 @@ spring:
         min-idle: 5
 #    cluster:
 #      nodes:
-#        - 114.67.168.57:31010
-#        - 114.67.168.57:31011
-#        - 114.67.168.57:31012
 #    lettuce:
 #      pool:
 #        max-active: 50
