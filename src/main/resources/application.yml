@@ -1,7 +1,7 @@
 spring:
   redis:
-    port:  # redis server port
-    host:  # redis server host
+    port: 6384 # redis server port
+    host: 10.25.246.26 # redis server host
     lettuce:
       pool:
         max-active: 50
@@ -12,27 +12,21 @@ spring:
     name: aaaaaaaaaa
 multiple-cache:
 #  redis:
-#    - name: testName2
-#      expire: 10000
-#      strategy: defaultRedisCacheStrategy
-#      decorators: demoCachedValueRebuilder
-#    - name: testName3
-#      expire: 10000
-#      strategy: defaultRedisCacheStrategy
-#      decorators: demoCachedValueRebuilder
-#  caffeine:
-#    - name: testName2
-#      expireAfterAccess: 30
-#      initialCapacity: 100
-#      maximumSize: 1000
-  multiple:
+#    - name: testCache
+#      expire: 100
+  caffeine:
     - name: testCache
-      caffeine:
-        expireAfterAccess: 30
-        initialCapacity: 100
-        maximumSize: 1000
-      redis:
-        expire: 100
+      expireAfterAccess: 30
+      initialCapacity: 100
+      maximumSize: 1000
+#  multiple:
+#    - name: testCache
+#      caffeine:
+#        expireAfterAccess: 30
+#        initialCapacity: 100
+#        maximumSize: 1000
+#      redis:
+#        expire: 100
 
 logging:
   level:

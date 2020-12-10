@@ -22,26 +22,26 @@ public class RedisCacheManagerAdapter implements CacheManager {
     private Map<String, AbstractRedisCacheStrategy> cacheStrategyMap;
     private Map<String, Set<CacheDecorationHandler>> decorationHandlers;
     private RedisCacheManagerProxy cacheManagerProxy;
-    private Map<String, RedisCacheConfiguration> expireMap;
+    private Map<String, RedisCacheConfiguration> redisCacheConfigurationMap;
     private Set<String> cacheNames;
 
     public RedisCacheManagerAdapter(RedisCacheWriter cacheWriter, Set<String> cacheNames,
-                                    boolean cacheNullValues, Map<String, RedisCacheConfiguration> expireMap,
+                                    boolean allowInFlightCacheCreation, Map<String, RedisCacheConfiguration> redisCacheConfigurationMap,
                                     Map<String, AbstractRedisCacheStrategy> cacheStrategyMap,
                                     Map<String, Set<CacheDecorationHandler>> decorationHandlers) {
         this.cacheStrategyMap = cacheStrategyMap;
         this.decorationHandlers = decorationHandlers;
         this.cacheNames = cacheNames;
-        this.expireMap = expireMap;
+        this.redisCacheConfigurationMap = redisCacheConfigurationMap;
         RedisCacheConfiguration defaultCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig();
-        cacheManagerProxy = new RedisCacheManagerProxy(cacheWriter, defaultCacheConfiguration, expireMap, cacheNullValues);
+        cacheManagerProxy = new RedisCacheManagerProxy(cacheWriter, defaultCacheConfiguration, redisCacheConfigurationMap, allowInFlightCacheCreation);
     }
 
     public void initCaches() {
 
         cacheManagerProxy.loadCaches().forEach(item -> {
             Cache storeCache = CacheDecorationBuilder.newBuilder(item, decorationHandlers.get(item.getName()))
-                    .customCacheStrategy(cacheStrategyMap.get(item.getName()), expireMap.get(item.getName()).getTtl().getSeconds())
+                    .customCacheStrategy(cacheStrategyMap.get(item.getName()), redisCacheConfigurationMap.get(item.getName()).getTtl().getSeconds())
                     .valueRebuild()
                     .build();
             this.cacheMap.put(item.getName(), storeCache);
