@@ -18,8 +18,7 @@ public class DemoController {
 
 
     @RequestMapping("cache-test")
-    public void demo(){
-        List<User> result = demoService.cacheTest("1");
-        System.out.println(result);
+    public List<User> demo(){
+        return demoService.cacheTest("1");
     }
 }

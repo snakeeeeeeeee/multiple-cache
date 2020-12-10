@@ -15,7 +15,6 @@ public class DemoService {
 
     @Cacheable(cacheNames = "testCache", key = "#id")
     public List<User> cacheTest(String id){
-        System.out.println("333");
         User user = new User();
         user.setAge(22);
         user.setName("xxx");
