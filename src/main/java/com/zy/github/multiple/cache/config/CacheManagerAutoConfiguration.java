@@ -191,7 +191,7 @@ public class CacheManagerAutoConfiguration {
             if (!ObjectUtils.isEmpty(item.getDecorators())) {
                 List<String> decoratorList = Arrays.asList(item.getDecorators().split(","));
                 Set<CacheDecorationHandler> collect = decoratorList.stream()
-                        .map(decorator -> decorationHandlerMap.get(decorator)).collect(Collectors.toSet());
+                        .map(decorationHandlerMap::get).collect(Collectors.toSet());
                 decorationHandlers.put(item.getName(), collect);
             }
         });
@@ -234,7 +234,7 @@ public class CacheManagerAutoConfiguration {
             if (!ObjectUtils.isEmpty(item.getDecorators())) {
                 List<String> decoratorList = Arrays.asList(item.getDecorators().split(","));
                 Set<CacheDecorationHandler> collect = decoratorList.stream()
-                        .map(decorator -> decorationHandlerMap.get(decorator)).collect(Collectors.toSet());
+                        .map(decorationHandlerMap::get).collect(Collectors.toSet());
                 decorationHandlers.put(item.getName(), collect);
             }
         });
@@ -278,7 +278,7 @@ public class CacheManagerAutoConfiguration {
             if (!ObjectUtils.isEmpty(item.getDecorators())) {
                 List<String> decoratorList = Arrays.asList(item.getDecorators().split(","));
                 Set<CacheDecorationHandler> collect = decoratorList.stream()
-                        .map(decorator -> decorationHandlerMap.get(decorator)).collect(Collectors.toSet());
+                        .map(decorationHandlerMap::get).collect(Collectors.toSet());
                 decorationHandlers.put(item.getName(), collect);
             }
 
