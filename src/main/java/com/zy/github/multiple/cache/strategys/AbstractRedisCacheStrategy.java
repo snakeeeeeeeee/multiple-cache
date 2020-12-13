@@ -40,24 +40,18 @@ public abstract class AbstractRedisCacheStrategy<K, V> implements CacheStrategy<
 
     public void init() {
         if (ObjectUtils.isEmpty(jacksonSerializer)) {
-            synchronized (AbstractRedisCacheStrategy.class) {
-                jacksonSerializer = jackson2JsonRedisSerializer();
-            }
+            jacksonSerializer = jackson2JsonRedisSerializer();
         }
 
         if (ObjectUtils.isEmpty(cacheName)) {
-            synchronized (AbstractRedisCacheStrategy.class) {
-                cacheName = CacheConstants.REDIS_DEFAULT;
-            }
+            cacheName = CacheConstants.REDIS_DEFAULT;
         }
     }
 
     public void init(String cacheName) {
         this.cacheName = cacheName;
         if (jacksonSerializer == null) {
-            synchronized (AbstractRedisCacheStrategy.class) {
-                jacksonSerializer = jackson2JsonRedisSerializer();
-            }
+            jacksonSerializer = jackson2JsonRedisSerializer();
         }
     }
 
@@ -68,7 +62,7 @@ public abstract class AbstractRedisCacheStrategy<K, V> implements CacheStrategy<
 
     protected byte[] rawKey(Object key) {
         Assert.notNull(key, "non null key required");
-        if(key instanceof String){
+        if (key instanceof String) {
             return stringSerializer.serialize(key);
         }
         return jacksonSerializer.serialize(key);
