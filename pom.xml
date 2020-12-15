@@ -86,13 +86,6 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>3.2.0</version>
                 <executions>
@@ -103,8 +96,8 @@
                         </goals>
                         <configuration>
                             <excludes>
-                                <exclude>**.yml</exclude>
-                                <exclude>**/MultipleCacheApplication.**</exclude>
+                                <exclude>**/MultipleCacheApplication.java</exclude>
+                                <exclude>**/application.yml</exclude>
                             </excludes>
                         </configuration>
                     </execution>
@@ -114,20 +107,14 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <configuration>
-                            <excludes>
-                                <exclude>**/application.yml</exclude>
-                                <exclude>**/MultipleCacheApplication**</exclude>
-                            </excludes>
-                        </configuration>
-                    </execution>
-                </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>**/application.yml</exclude>
+                        <exclude>**/MultipleCacheApplication**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
-
     </build>
 
 
