@@ -10,12 +10,8 @@ spring:
         min-idle: 5
 #    cluster:
 #      nodes:
-#    lettuce:
-#      pool:
-#        max-active: 50
-#        max-wait: 2000
-#        max-idle: 20
-#        min-idle: 5
+
+
   application:
     name: aaaaaaaaaa
 multiple-cache:
