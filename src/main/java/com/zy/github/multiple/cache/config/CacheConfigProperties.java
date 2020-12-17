@@ -82,9 +82,24 @@ public class CacheConfigProperties {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class RedisCacheConfig {
+        /**
+         * 缓存名称
+         */
         protected String name;
+
+        /**
+         * 过期时间
+         */
         protected long expire;
+
+        /**
+         * 缓存策略(bean 名称首字母小写)
+         */
         protected String strategy;
+
+        /**
+         * 缓存重构策略
+         */
         protected String decorators;
     }
 
@@ -93,9 +108,25 @@ public class CacheConfigProperties {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class MultipleCacheConfig {
+
+        /**
+         * 缓存名称
+         */
         protected String name;
+
+        /**
+         * Caffeine配置
+         */
         protected CaffeineCacheConfig caffeine;
+
+        /**
+         * Redis配置
+         */
         protected RedisCacheConfig redis;
+
+        /**
+         * 缓存重构策略
+         */
         protected String decorators;
     }
 }

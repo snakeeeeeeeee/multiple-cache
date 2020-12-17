@@ -43,7 +43,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @author zy 2020/11/29
+ * @author z 2020/11/29
  */
 @Configuration
 @ConditionalOnMissingBean(CacheManager.class)
@@ -76,7 +76,7 @@ public class CacheManagerAutoConfiguration {
         // 配置redisTemplate
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(lettuceConnectionFactory);
-        RedisSerializer<String> stringSerializer = new StringRedisSerializer();
+        RedisSerializer<String> stringSerializer = RedisSerializer.string();
         redisTemplate.setKeySerializer(stringSerializer);
         redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
         redisTemplate.setHashKeySerializer(stringSerializer);
@@ -92,7 +92,7 @@ public class CacheManagerAutoConfiguration {
 
         StringRedisTemplate redisTemplate = new StringRedisTemplate();
         redisTemplate.setConnectionFactory(lettuceConnectionFactory);
-        RedisSerializer<String> stringSerializer = new StringRedisSerializer();
+        RedisSerializer<String> stringSerializer = RedisSerializer.string();
         redisTemplate.setKeySerializer(stringSerializer);
         redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
         redisTemplate.setHashKeySerializer(stringSerializer);
@@ -131,7 +131,7 @@ public class CacheManagerAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(CacheSyncMessageListener.class)
-    public CacheSyncMessageListener cacheSyncMessageListener(CacheSyncManager cacheSyncManager, RedisTemplate<String, Object> redisTemplate) {
+    public CacheSyncMessageListener cacheSyncMessageListener(CacheSyncManager cacheSyncManager, RedisTemplate redisTemplate) {
         return new CacheSyncMessageListener(redisTemplate, cacheSyncManager);
     }
 
@@ -191,7 +191,7 @@ public class CacheManagerAutoConfiguration {
             if (!ObjectUtils.isEmpty(item.getDecorators())) {
                 List<String> decoratorList = Arrays.asList(item.getDecorators().split(","));
                 Set<CacheDecorationHandler> collect = decoratorList.stream()
-                        .map(decorator -> decorationHandlerMap.get(decorator)).collect(Collectors.toSet());
+                        .map(decorationHandlerMap::get).collect(Collectors.toSet());
                 decorationHandlers.put(item.getName(), collect);
             }
         });
@@ -234,7 +234,7 @@ public class CacheManagerAutoConfiguration {
             if (!ObjectUtils.isEmpty(item.getDecorators())) {
                 List<String> decoratorList = Arrays.asList(item.getDecorators().split(","));
                 Set<CacheDecorationHandler> collect = decoratorList.stream()
-                        .map(decorator -> decorationHandlerMap.get(decorator)).collect(Collectors.toSet());
+                        .map(decorationHandlerMap::get).collect(Collectors.toSet());
                 decorationHandlers.put(item.getName(), collect);
             }
         });
@@ -278,7 +278,7 @@ public class CacheManagerAutoConfiguration {
             if (!ObjectUtils.isEmpty(item.getDecorators())) {
                 List<String> decoratorList = Arrays.asList(item.getDecorators().split(","));
                 Set<CacheDecorationHandler> collect = decoratorList.stream()
-                        .map(decorator -> decorationHandlerMap.get(decorator)).collect(Collectors.toSet());
+                        .map(decorationHandlerMap::get).collect(Collectors.toSet());
                 decorationHandlers.put(item.getName(), collect);
             }
 

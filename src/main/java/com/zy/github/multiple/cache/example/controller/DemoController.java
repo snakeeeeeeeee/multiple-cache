@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * @author zy 2020/12/3
+ * @author z 2020/12/3
  */
 @RestController
 public class DemoController {
@@ -19,6 +19,6 @@ public class DemoController {
 
     @RequestMapping("cache-test")
     public List<User> demo(){
-        return demoService.cacheTest("1");
+        return demoService.cacheTest("testId");
     }
 }

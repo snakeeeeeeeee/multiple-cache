@@ -8,6 +8,10 @@ spring:
         max-wait: 2000
         max-idle: 20
         min-idle: 5
+#    cluster:
+#      nodes:
+
+
   application:
     name: aaaaaaaaaa
 multiple-cache:

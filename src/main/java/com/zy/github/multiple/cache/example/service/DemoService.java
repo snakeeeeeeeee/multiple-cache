@@ -6,9 +6,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
- * @author zy 2020/12/3
+ * @author z 2020/12/3
  */
 @Service
 public class DemoService {
@@ -23,5 +24,4 @@ public class DemoService {
         users.add(user);
         return users;
     }
-
 }
