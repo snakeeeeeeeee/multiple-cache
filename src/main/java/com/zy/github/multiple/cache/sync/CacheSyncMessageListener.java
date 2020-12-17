@@ -27,7 +27,7 @@ public class CacheSyncMessageListener implements MessageListener {
             CacheSyncEvent event = (CacheSyncEvent) redisTemplate
                     .getValueSerializer().deserialize(message.getBody());
             if (ObjectUtils.nullSafeEquals(HostUtil.getHostName(), event.getHost())) {
-                log.info("该消息由本机发出，无须处理：{}", event);
+                log.debug("该消息由本机发出，无须处理：{}", event);
                 return;
             }
             cacheSyncManager.handle(event);

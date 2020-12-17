@@ -24,27 +24,4 @@ public class DemoService {
         users.add(user);
         return users;
     }
-
-    @Cacheable(cacheNames = "testCache", key = "#id")
-    public List<User> cacheTest2(Integer id){
-        User user = new User();
-        user.setAge(33);
-        user.setName("zzz");
-
-        List<User> users = new ArrayList<>();
-        users.add(user);
-        return users;
-    }
-
-    @Cacheable(cacheNames = "testCache", key = "#map")
-    public List<User> cacheTest3(Map map){
-        User user = new User();
-        user.setAge(44);
-        user.setName("ccc");
-
-        List<User> users = new ArrayList<>();
-        users.add(user);
-        return users;
-    }
-
 }
